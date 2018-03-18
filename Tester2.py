@@ -15,25 +15,35 @@ class Tester():
 		
 
 		#######
+		# Test document
 		self.testDocument = testDocument
+
+		# Load Trainer
 		self.Trainer = pickle.load(open('./Prob.p','rb'))
+
+		# Temp vars for testing
 		self.numcorrect=0
 		self.numtotal=0
-		self.wrong_choice_num = {"Str":0,"Pol":0,"Dis":0,"Cri":0,"Oth":0}
+
+		# K value for laplace smoothing
 		self.k = .05
-		self.predictions = {"Str":0,"Pol":0,"Dis":0,"Cri":0,"Oth":0}
+	
+		# Predictions dictionary
+		self.predictions = dict(self.Trainer.total_words_in_doc) 
+		for cat in self.predictions:
+			self.predictions[cat] = 0
 
 		
 	def test_document(self,filetest,filecheck):
+		# Track encountered words so no double counting
 		encountered_words = {}
 
 		# Count of unknown words in document
-		other_words = self.wrong_choice_num
+		other_words = dict(self.predictions)
 
+		# Initialize
 		for cat in other_words:
 			other_words[cat] = 0
-
-		
 
 		# Opens file
 		f = open(filetest,"r")
@@ -44,41 +54,34 @@ class Tester():
 		# Stem the tokens
 		stemmer = PorterStemmer()
 
-		#current_word_count = {}
 		for token in tokens:
-
 			# Stem
 			token = stemmer.stem(token)
 
+			# Exclude any punctuation
 			if token not in encountered_words and token not in list(string.punctuation):
+				# Update encountered words
 				encountered_words[token] = True
 			
 
 			for cat in self.Trainer.diff_words_per_doc_count:
-				
-
 				if token not in self.Trainer.diff_words_per_doc_count[cat] and token not in list(string.punctuation):
 					
 					# Increase count of unknown words
 					other_words[cat] +=1
-					#self.Trainer.predictions[cat] += -10
-
 				else:
 					if token not in list(string.punctuation):
-
-						# Computes predictions
+						# Computes predictions for known words
 						self.predictions[cat] += log((self.Trainer.diff_words_per_doc_count[cat][token]+self.k)/(self.Trainer.total_words_in_doc[cat]+(self.k*len(encountered_words))))
-						#self.Trainer.predictions[cat]+=log((self.Trainer.words_per_doc[cat][token])/(self.Trainer.total_docs[cat]+100))
 
 		for cat in self.predictions:
+			# Computes predictions for unknown words
 			self.predictions[cat]+=(log(self.k/(self.Trainer.total_words_in_doc[cat]+(self.k*len(encountered_words))))*other_words[cat])
 		
-		print(other_words)
-		print('-'*30)
-		#print(filetest)
-		pprint(self.predictions)
+		# Make the actual guess
 		guess = max(self.predictions.iteritems(), key=operator.itemgetter(1))[0] 
-		# Max or Min???
+
+		# CHANGE TO FILE
 		print(filetest)
 		print(guess)
 		print(filecheck)
@@ -87,7 +90,7 @@ class Tester():
 			self.numtotal+=1
 		else:
 			self.numtotal+=1
-			self.wrong_choice_num[guess]+=1
+			#self.wrong_choice_num[guess]+=1
 		print('-'*30)
 		for cat in self.predictions:
 			self.predictions[cat] = 0
@@ -109,10 +112,9 @@ class Tester():
 			# [filepath, category]
 			self.test_document(document.split()[0],document.split()[1])
 
-			#self.other_words = {"Str":0,"Pol":0,"Dis":0,"Cri":0,"Oth":0}
 		print(float(self.numcorrect)/float(self.numtotal))
-		print('Wrong choices: ')
-		print(self.wrong_choice_num)
+		
+		
 
 
 

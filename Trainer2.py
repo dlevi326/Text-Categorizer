@@ -12,22 +12,15 @@ class Trainer():
 	def __init__(self,filelist):
 
 		# Number of words in documents
-		self.total_docs = {"Str":0,"Pol":0,"Dis":0,"Cri":0,"Oth":0}
+		#self.total_docs = {"Str":0,"Pol":0,"Dis":0,"Cri":0,"Oth":0}
+		self.total_words_in_doc = {}
 
 		# Number of total words
-		self.words_per_doc = {"Str":{},"Pol":{},"Dis":{},"Cri":{},"Oth":{}}
-
-
-		self.diff_words_per_doc_count = self.total_docs
-		self.total_words_in_doc = self.words_per_doc
+		#self.words_per_doc = {"Str":{},"Pol":{},"Dis":{},"Cri":{},"Oth":{}}
+		self.diff_words_per_doc_count = {}
 
 		# Training file
 		self.filelist = filelist
-
-
-		
-		
-
 
 
 	def populate_table(self,trainfile,category):
@@ -42,6 +35,12 @@ class Trainer():
 		stemmer = PorterStemmer()
 
 		# Increases number of documents in the category
+
+		# Adds category if not already present
+		if category not in self.total_words_in_doc:
+			self.total_words_in_doc[category] = 0
+			self.diff_words_per_doc_count[category] = {}
+
 		
 
 		for token in tokens:
@@ -72,12 +71,8 @@ class Trainer():
 		for document in docs:
 			self.populate_table(document.split()[0],document.split()[1])
 
-		#pprint(self.words_per_doc['Cri'])
-		#for key, value in sorted(self.words_per_doc['Cri'].iteritems(), key=lambda (k,v): (v,k)):
-		#	print ("%s:%s" % (key,value))
-
 		# Save object for later use
-		self.words_per_doc = self.diff_words_per_doc_count
-		self.total_docs = self.total_words_in_doc
+		#self.words_per_doc = self.diff_words_per_doc_count
+		#self.total_docs = self.total_words_in_doc
 		pickle.dump(self,open('../Prob.p','wb'))
 
