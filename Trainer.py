@@ -14,10 +14,12 @@ class Trainer():
 		self.filelist = filelist 
 
 		# Keeps track of number of docs in each category
-		self.total_docs = {"Str":0,"Pol":0,"Dis":0,"Cri":0,"Oth":0}  
+		#self.total_docs = {"Str":0,"Pol":0,"Dis":0,"Cri":0,"Oth":0} 
+		self.total_docs = {} 
 
 		# Keeps track of words per category per document
-		self.words_per_doc = {"Str":{},"Pol":{},"Dis":{},"Cri":{},"Oth":{}}
+		#self.words_per_doc = {"Str":{},"Pol":{},"Dis":{},"Cri":{},"Oth":{}}
+		self.words_per_doc = {}
 
 		# K value for laplace smoothing
 		self.k = 1
@@ -27,18 +29,44 @@ class Trainer():
 		self.encountered_words = {}
 
 		# Final probabilities
-		self.final_probabilities = {"Str":0,"Pol":0,"Dis":0,"Cri":0,"Oth":0}
+		#self.final_probabilities = {"Str":0,"Pol":0,"Dis":0,"Cri":0,"Oth":0}
+		self.final_probabilities = {}
+
+		# Computed probabilities of categories
+		self.predictions = {}
+
+
 
 	def populate_table(self,trainfile,category):
+		# Opens individual file
 		f = open(trainfile,'r')
+
+		# Tokenizes documents
 		tokens = word_tokenize(f.read())
+
+		# Stemmer
 		stemmer = PorterStemmer()
+
+		# Add category to dictionary
+		if category not in self.words_per_doc:
+			self.words_per_doc[category] = {}
+			self.total_docs[category] = 0
+			self.final_probabilities[category] = 0
+			self.predictions[category] = 0
+
+		# Increases number of documents in the category
 		self.total_docs[category]+=1
 
 		for token in tokens:
+
+			# Stems token
 			token = stemmer.stem(token)
+
 			if token not in self.encountered_words:
+				# Add to list of documented words
 				self.encountered_words[token] = True
+
+				# Add to words in category
 				if token not in self.words_per_doc[category]:
 					self.words_per_doc[category][token] = 1
 				else:
@@ -49,12 +77,19 @@ class Trainer():
 
 		# Opens training files
 		f = open(self.filelist,"r")
+
 		# Puts all training docs into var docs
 		docs = f.readlines()
+
 		# [filepath, category]
 		os.chdir('TC_provided')
-		for document in docs[0:300]:
+		for document in docs[0:400]:
 			self.populate_table(document.split()[0],document.split()[1])
+
+		#pprint(self.words_per_doc['Cri'])
+		#for key, value in sorted(self.words_per_doc['Cri'].iteritems(), key=lambda (k,v): (v,k)):
+		#	print ("%s:%s" % (key,value))
+
 		# Save object for later use
 		pickle.dump(self,open('../Prob.p','wb'))
 

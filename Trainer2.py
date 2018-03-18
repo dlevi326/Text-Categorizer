@@ -9,57 +9,75 @@ from math import log
 import pickle
 
 class Trainer():
-
 	def __init__(self,filelist):
-		self.filelist = filelist
-		self.total_words = {"Str":0,"Pol":0,"Dis":0,"Cri":0,"Oth":0}
 
-	words_in_categories = {"Str":{},"Pol":{},"Dis":{},"Cri":{},"Oth":{}}
-	final_probabilities = {"Str":{},"Pol":{},"Dis":{},"Cri":{},"Oth":{}}
+		# Number of words in documents
+		self.total_docs = {"Str":0,"Pol":0,"Dis":0,"Cri":0,"Oth":0}
+
+		# Number of total words
+		self.words_per_doc = {"Str":{},"Pol":{},"Dis":{},"Cri":{},"Oth":{}}
+
+
+		self.diff_words_per_doc_count = self.total_docs
+		self.total_words_in_doc = self.words_per_doc
+
+		# Training file
+		self.filelist = filelist
+
+
+		
+		
+
+
 
 	def populate_table(self,trainfile,category):
-		encountered_words = {}
-		f = open(trainfile,"r")
-		tokens = word_tokenize(f.read())
-		stemmer = PorterStemmer()
-		
-		self.total_words[category]+=1
-		for token in tokens:
-			#word = ''.join(x for x in toke if x.isalpha()) #--> Make words only alpha???
-			toke = stemmer.stem(token)
-			if toke in encountered_words: #--> Should I add this?
-				continue
-			else:
-				
-				encountered_words[toke] = True
-				if toke in self.words_in_categories[category]:
-					self.words_in_categories[category][toke]+=1
-					#self.total_words[category]+=1
-				else:
-					self.words_in_categories[category][toke] = 1
-					#self.total_words[category]+=1
-		#pprint(self.words_in_categories)
 
+		# Opens individual file
+		f = open(trainfile,'r')
+
+		# Tokenizes documents
+		tokens = word_tokenize(f.read())
+
+		# Stemmer
+		stemmer = PorterStemmer()
+
+		# Increases number of documents in the category
+		
+
+		for token in tokens:
+			#print(self.words_per_doc)
+
+			# Stems token
+			token = stemmer.stem(token)
+			self.total_words_in_doc[category]+=1
+
+			if token in self.diff_words_per_doc_count[category]:
+				self.diff_words_per_doc_count[category][token]+=1
+			else:
+				self.diff_words_per_doc_count[category][token]=1
+
+			
+		
 
 	def handle_files(self):
+
+		# Opens training files
 		f = open(self.filelist,"r")
-		docs = f.readlines() # Puts all training docs into var docs
+
+		# Puts all training docs into var docs
+		docs = f.readlines()
+
 		# [filepath, category]
 		os.chdir('TC_provided')
-		for document in docs[0:500]:
+		for document in docs:
 			self.populate_table(document.split()[0],document.split()[1])
-		for cat in self.words_in_categories:
-			for word in self.words_in_categories[cat]:
-				self.final_probabilities[cat][word] = log(float(self.words_in_categories[cat][word])/float(self.total_words[cat]))
-		pprint(self.final_probabilities)
-		#print(max(self.final_probabilities["Str"].iteritems(), key=operator.itemgetter(1))[0])
-		
-		#print(max(self.final_probabilities["Str"]))
-		for cat in self.final_probabilities:
-			self.final_probabilities[cat]['**other_word**']= log(float(1)/float(self.total_words[cat]))
-		pickle.dump(self.final_probabilities,open('../Prob.p','wb'))
-		for key, value in sorted(self.final_probabilities['Str'].iteritems(), key=lambda (k,v): (v,k)):
-			print ("%s:%s" % (key,value))
 
+		#pprint(self.words_per_doc['Cri'])
+		#for key, value in sorted(self.words_per_doc['Cri'].iteritems(), key=lambda (k,v): (v,k)):
+		#	print ("%s:%s" % (key,value))
 
+		# Save object for later use
+		self.words_per_doc = self.diff_words_per_doc_count
+		self.total_docs = self.total_words_in_doc
+		pickle.dump(self,open('../Prob.p','wb'))
 

@@ -1,9 +1,11 @@
 from __future__ import division  # Python 2 users only
 import nltk, re, pprint
 from nltk import word_tokenize
-from Trainer import Trainer
-from Tester import Tester
+from Trainer2 import Trainer
+from Tester2 import Tester
 
 if __name__ == "__main__":
-	test = Tester('./TC_provided/corpus1_train.labels')
+	print('Please enter the testing file: ')
+	testingFile = './TC_provided/corpus1_test.labels'
+	test = Tester(testingFile)
 	test.execute_tests()
