@@ -5,7 +5,6 @@ from Trainer import Trainer
 from Tester import Tester
 
 if __name__ == "__main__":
-	print('Please enter the testing file: ')
-	testingFile = './TC_provided/corpus3_train.labels'
+	testingFile = raw_input('Please enter the testing file: ')
 	test = Tester(testingFile)
 	test.execute_tests()
