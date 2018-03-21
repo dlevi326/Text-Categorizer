@@ -1,9 +1,8 @@
 from __future__ import division  # Python 2 users only
-import nltk, re, pprint
+import nltk, re
 from nltk import word_tokenize
 from nltk.stem import *
 import os
-from pprint import pprint
 import operator
 import pickle
 from math import log
@@ -26,14 +25,7 @@ class Tester():
 		self.numtotal=0
 
 		# K value for laplace smoothing
-		if 'Pol' in self.Trainer.total_words_in_doc:
-			self.k = .06
-		elif 'I' in self.Trainer.total_words_in_doc:
-			self.k = .05
-		elif 'Sci' in self.Trainer.total_words_in_doc:
-			self.k = .06
-		else:
-			self.k = .06
+		self.k = .06
 	
 		# Predictions dictionary
 		self.predictions = dict(self.Trainer.total_words_in_doc) 
@@ -41,7 +33,8 @@ class Tester():
 			self.predictions[cat] = 0
 
 		
-	def test_document(self,filetest,filecheck):
+	# filecheck used for testing
+	def test_document(self,filetest,filecheck = ''):
 		# Track encountered words so no double counting
 		encountered_words = {}
 
@@ -89,19 +82,21 @@ class Tester():
 		guess = max(self.predictions.iteritems(), key=operator.itemgetter(1))[0] 
 
 		# Just outputs percentage instead of using perl script (for testing)
+		'''
 		if(guess==filecheck):
 			self.numcorrect+=1
 			self.numtotal+=1
 		else:
 			self.numtotal+=1
-
+		'''
 		for cat in self.predictions:
 			self.predictions[cat] = 0
+		
 		return str(filetest+' '+guess)
+		
 
 		
 	def output_file(self,outfile,output):
-		os.chdir('..')
 		f = open(outfile,"w")
 
 		for out in output:
@@ -117,17 +112,21 @@ class Tester():
 
 		# Puts training documents into list
 		docs = f.readlines()
+		
 
 		output = []
-		os.chdir('TC_provided')
+		
+	
+
 		for document in docs:
 			# [filepath, category]
-			output.append(self.test_document(document.split()[0],document.split()[1]))
+			document=document[:-1]
+			output.append(self.test_document(document))
 
 		outfile = raw_input('Please enter the out file: ')
 		self.output_file(outfile,output)
 
-		print(float(self.numcorrect)/float(self.numtotal))
+		#print(float(self.numcorrect)/float(self.numtotal))
 		
 
 

@@ -1,5 +1,5 @@
 from __future__ import division  # Python 2 users only
-import nltk, re, pprint
+import nltk, re
 from nltk import word_tokenize
 from Trainer import Trainer
 from Tester import Tester

@@ -1,9 +1,8 @@
 from __future__ import division, print_function  # Python 2 users only
-import nltk, re, pprint
+import nltk, re
 from nltk import word_tokenize
 from nltk.stem import *
 import os
-from pprint import pprint
 import operator
 from math import log
 import pickle
@@ -67,12 +66,12 @@ class Trainer():
 		docs = f.readlines()
 
 		# [filepath, category]
-		os.chdir('TC_provided')
+		
 		for document in docs:
 			self.populate_table(document.split()[0],document.split()[1])
 
 		# Save object for later use
 		#self.words_per_doc = self.diff_words_per_doc_count
 		#self.total_docs = self.total_words_in_doc
-		pickle.dump(self,open('../Prob.p','wb'))
+		pickle.dump(self,open('./Prob.p','wb'))
 
